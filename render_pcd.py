@@ -29,6 +29,8 @@ def parse_args():
     parser.add_argument('--views', type=int, default=10, help="number of views to render, if not animation")
     parser.add_argument('--pt_size', type=float, default=0.01, help='size of each point of the cloud')
     parser.add_argument('--color', type=tuple, default=(1.0, 0.0, 0.0, 1.0), help='color of the points')
+    parser.add_argument('--out_path', type=str, default='', required=True, help='output folder')
+
 
     args = parser.parse_args()
     return args
@@ -42,7 +44,7 @@ def main():
     pt_size = args.pt_size      # size of the points      
     
 
-    path_out = Path("infusion_renders")
+    path_out = Path(args.out_path)
     path_out.mkdir(exist_ok=True, parents=True)
 
     # Read from hesiod
