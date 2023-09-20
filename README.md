@@ -18,6 +18,7 @@ pip install numpy
 
 ## Usage
 The input data to render must be in .ply format.
+>REMARK: some sample files are provided in the folder input_data/
 
 To render multiple views of the 3D shape:
 ```console
