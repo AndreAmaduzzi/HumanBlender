@@ -26,6 +26,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--pc_path', type=str, default='', required=True, help='path of the PLY point cloud to render')
     parser.add_argument('--animation', action="store_true", help='if set, the output is an AVI video with the rotating cloud')
+    parser.add_argument('--frames', type=int, default=200, help='number of frames of the animation')
     parser.add_argument('--views', type=int, default=10, help="number of views to render, if not animation")
     parser.add_argument('--pt_size', type=float, default=0.01, help='size of each point of the cloud')
     parser.add_argument('--color', type=tuple, default=(1.0, 0.0, 0.0, 1.0), help='color of the points')
@@ -131,7 +132,7 @@ def main():
     if animation:
         obj.rotation_mode = 'XYZ'
         scene.frame_start = 1
-        scene.frame_end = 400
+        scene.frame_end = args.frames
         obj.rotation_euler = rot_object
         obj.keyframe_insert('rotation_euler', index=-1 ,frame=scene.frame_start)
         obj.rotation_euler = (0, 0, math.radians(360))
