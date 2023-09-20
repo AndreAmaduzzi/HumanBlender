@@ -24,7 +24,7 @@ from utils import (
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--pc_path', type=str, default='shapes/chair_pcd.ply', help='path of the PLY point cloud to render')
+    parser.add_argument('--pc_path', type=str, default='', required=True, help='path of the PLY point cloud to render')
     parser.add_argument('--animation', action="store_true", help='if set, the output is an AVI video with the rotating cloud')
     parser.add_argument('--views', type=int, default=10, help="number of views to render, if not animation")
     parser.add_argument('--pt_size', type=float, default=0.01, help='size of each point of the cloud')
