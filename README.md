@@ -22,12 +22,12 @@ The input data to render must be in .ply format.
 
 To render multiple views of the 3D shape:
 ```console
-python render_pcd.py --pc_path <path_to_ply> --views <n_views>
+python render_pcd.py --pc_path <path_to_ply> --views <n_views> --out_path <path_to_output_folder>
 ```
 
 To get an AVI animation of the rotating 3D shape
 ```console
-python render_pcd.py --pc_path <path_to_ply> --animation
+python render_pcd.py --pc_path <path_to_ply> --animation --out_path <path_to_output_folder>
 ```
 
 **Additional arguments**: 
