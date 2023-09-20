@@ -25,11 +25,12 @@ To render multiple views of the 3D shape:
 python render_pcd.py --pc_path <path_to_ply> --views <n_views> --out_path <path_to_output_folder>
 ```
 
-To get an AVI animation of the rotating 3D shape
+To get an AVI animation of the rotating 3D shape:
 ```console
-python render_pcd.py --pc_path <path_to_ply> --animation --out_path <path_to_output_folder>
+python render_pcd.py --pc_path <path_to_ply> --animation  --out_path <path_to_output_folder>
 ```
 
 **Additional arguments**: 
+* _frames_: number of frames in the animation
 * _pt_size_: size of the points
 * _color_: color of the points (if the point cloud is not colored)
