@@ -146,7 +146,7 @@ def main():
             print("Rotation {}, {}".format((stepsize * i), math.radians(stepsize * i)))
 
             filename = os.path.splitext(os.path.basename(args.pc_path))[0]
-            render_file_path = f"{path_out}/'{filename}_{i}"
+            render_file_path = f"{path_out}/{filename}_{i}"
 
             scene.render.filepath = render_file_path
             print('render file path: ', render_file_path)
