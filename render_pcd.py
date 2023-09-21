@@ -52,14 +52,13 @@ def main():
     num_samples = 100
     res_x = int(800)
     res_y = int(800)
-    devices = [0]
     location_camera = (0, 4.0, 1.0)
     loc_light = (0, 0, 2)
     rot_light = (math.radians(0), math.radians(0), math.radians(0))
     energy = 3.0
     rot_object = (math.radians(0), math.radians(0), math.radians(0))    # Adjust here the rotation of the cloud, if not correct in the output
     add_plane = False
-    devices = [0]
+    devices = []
     save_blender = True
     use_denoiser = True
     lens = 85
