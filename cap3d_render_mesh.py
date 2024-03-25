@@ -5,6 +5,8 @@
 # This code is licensed under the MIT License.
 # ==============================================================================
 
+### from https://github.com/crockwell/Cap3D/blob/main/captioning_pipeline/render_script.py
+
 import bpy
 import sys
 import mathutils
