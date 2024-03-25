@@ -5,8 +5,6 @@
 # This code is licensed under the MIT License.
 # ==============================================================================
 
-### from https://github.com/crockwell/Cap3D/blob/main/captioning_pipeline/render_script.py
-
 import bpy
 import sys
 import mathutils
@@ -71,18 +69,128 @@ else:
 
 # if the object is too far away from the origin, pull it closer
 def check_object_location(mesh_objects, max_distance):
+    # Compute the maximum distance of any object from the origin
+    max_obj_distance = max(obj.location.length for obj in mesh_objects)
+
+    # If any object is too far from the origin, move all mesh_objects closer to the origin
+    if max_obj_distance > max_distance:
+        print("mesh_objects are too far from the origin. Centering objects...")
+        bbox_center, _ = compute_bounding_box(mesh_objects)
+        for obj in mesh_objects:
+            obj.location -= bbox_center
+        bpy.context.view_layer.update()
+    else:
+        print("Object initial locations are within range.")
+        print('max_obj_distance:', max_obj_distance, 'max_distance:', max_distance)
+
+    # Compute the maximum distance again and check if it's within range
+    max_obj_distance = max(obj.location.length for obj in mesh_objects)
+    if max_obj_distance > max_distance:
+        print("Objects are still too far from the origin. Please adjust the object locations and try again.")
+        return False
+    else:
+        print("Object locations are within range.")
         return True
 
 # compute the bounding box of the mesh objects
 def compute_bounding_box(mesh_objects):
+    min_coords = Vector((float('inf'), float('inf'), float('inf')))
+    max_coords = Vector((float('-inf'), float('-inf'), float('-inf')))
+
+    for obj in mesh_objects:
+        matrix_world = obj.matrix_world
+        mesh = obj.data
+
+        for vert in mesh.vertices:
+            global_coord = matrix_world @ vert.co
+
+            min_coords = Vector((min(min_coords[i], global_coord[i]) for i in range(3)))
+            max_coords = Vector((max(max_coords[i], global_coord[i]) for i in range(3)))
+
+    bbox_center = (min_coords + max_coords) / 2
+    bbox_size = max_coords - min_coords
+
     return bbox_center, bbox_size
 
 # normalize objects 
 def normalize_and_center_objects(mesh_objects, normalization_range):
+
+    bbox_center, bbox_size = compute_bounding_box(mesh_objects)
+
+    # Check the location of the objects and move them closer to the origin if necessary
+    check_object_location(mesh_objects, 1000)
+
+    # Compute the bounding box of the objects again after making adjustments
+    bbox_center, bbox_size = compute_bounding_box(mesh_objects)
+
+    # Normalize the objects within a certain range
+    max_dimension = max(bbox_size.x, bbox_size.y, bbox_size.z)
+    scaling_factor = normalization_range / max_dimension
+
+    for obj in mesh_objects:
+        mesh = obj.data
+        matrix_world = obj.matrix_world
+        inv_matrix_world = matrix_world.inverted()
+        for vert in mesh.vertices:
+            global_coord = matrix_world @ vert.co
+            global_coord -= bbox_center
+            global_coord *= scaling_factor
+            vert.co = inv_matrix_world @ global_coord
+        mesh.update()
+        obj.data.update()
+
+    bpy.context.view_layer.update()
+    bbox_center, bbox_size = compute_bounding_box(mesh_objects)
+    print('final bbox_center: ', bbox_center)
+    print('final bbox_size: ', bbox_size)
+
     return bbox_center, bbox_size
 
 # check if rendered object will cross the boundary of the image
 def project_points_to_camera_space(obj, camera):
+    bpy.context.view_layer.update()
+    # Get the 8 corners of the bounding box in local space
+    bbox_local = [Vector(corner) for corner in obj.bound_box]
+    # print(bbox_local)
+
+    # Transform bounding box corners to world space
+    bbox_world = [obj.matrix_world @ corner for corner in bbox_local]
+    bbox_world = [np.array(corner) for corner in bbox_world]  # convert to numpy
+
+    # Get the 4x4 transformation matrix of the camera
+    RT = np.array(camera.matrix_world.inverted())
+    RT = RT[:3, :4]  # Remove the last row to make it a 3x4 matrix
+
+    # Get the intrinsic matrix K from the camera properties
+    width = bpy.context.scene.render.resolution_x
+    height = bpy.context.scene.render.resolution_y
+    f_x = width / 2.0 / np.tan(camera.data.angle / 2.0)
+    f_y = height / 2.0 / np.tan(camera.data.angle / 2.0)
+    c_x = width / 2.0
+    c_y = height / 2.0
+
+    K = np.array([[f_x, 0, c_x], [0, f_y, c_y], [0, 0, 1]])
+
+    bbox_camera = []
+    bbox_image = []
+
+    for vertex in bbox_world:
+        # Transform from world to camera space
+        XYZ_camera = np.dot(RT, np.append(vertex, 1))  # Append 1 to make it a 4-element vector for multiplication with RT
+
+        # Project from camera space to image space
+        XYZ_image = np.dot(K, XYZ_camera)
+
+        # Homogenize to get pixel coordinates
+        XYZ_image /= XYZ_image[2]
+
+        bbox_camera.append(XYZ_camera)
+        bbox_image.append(XYZ_image[:2])  # Keep only x and y
+
+    # Check if the coordinates are within the normalized device coordinates [-1, 1]
+    is_within_ndc = all(np.all(np.abs(vertex[:2]) <= 1) for vertex in bbox_image)
+
+    # print(is_within_ndc)
     return bbox_image
 
 # prepare the scene
