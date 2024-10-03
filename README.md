@@ -1,5 +1,5 @@
 # HumanBlender
-Rendering 3D data using Blender
+Rendering 3D models using Blender
 
 ## Installation
 
